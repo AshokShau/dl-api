@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/Abishnoi69/ytDl-Api/api"
+	"github.com/Abishnoi69/ytdl-api/api"
 	"log"
 	"net/http"
 )
