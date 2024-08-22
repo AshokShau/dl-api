@@ -2,7 +2,10 @@ module github.com/Abishnoi69/ytDl-Api
 
 go 1.22.6
 
-require github.com/kkdai/youtube/v2 v2.10.1
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/kkdai/youtube/v2 v2.10.1
+)
 
 require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect

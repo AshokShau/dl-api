@@ -6,6 +6,9 @@ Welcome to the YouTube Downloader API. This API allows you to download video inf
 
 - Go 1.22.6 or higher
 
+## Configuration
+* `SOCKS5_PROXY` : SOCKS5 proxy URL (optional)
+
 ## Setup
 
 1. Clone the repository:
@@ -66,4 +69,4 @@ Contributions are welcome! For bug reports, feature requests, or pull requests, 
 
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
+This project is licensed under the MIT License—see the [LICENSE](/LICENSE) file for details.
