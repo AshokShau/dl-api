@@ -3,12 +3,27 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/kkdai/youtube/v2"
+	"net/http"
+	"net/url"
+	"os"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	var Socks5Proxy = os.Getenv("SOCKS5_PROXY")
+
+	ytClient := youtube.Client{}
+	var client *http.Client
+	if Socks5Proxy != "" {
+		proxyURL, _ := url.Parse(Socks5Proxy)
+		client = &http.Client{Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyURL),
+		}}
+		ytClient = youtube.Client{HTTPClient: client}
+	}
+
 	switch r.URL.Path {
 	case "/":
 		msg := `Welcome to ytDl API
@@ -21,9 +36,12 @@ Example:
 /playlist?url=https://www.youtube.com/playlist?list=playlist_id
 /playlist?url=playlist_id
 
-Made with  by @Abishnoi69
+Made with ❤ by @Abishnoi69
 Golang API for downloading YouTube videos and playlists
 `
+		if Socks5Proxy == "" {
+			msg += "No SOCKS5 proxy configured, maybe you get rate limited by YouTube :("
+		}
 		_, _ = fmt.Fprint(w, msg)
 
 	case "/dl":
@@ -33,15 +51,14 @@ Golang API for downloading YouTube videos and playlists
 			return
 		}
 
-		client := youtube.Client{}
-		video, err := client.GetVideo(videoURL)
+		video, err := ytClient.GetVideo(videoURL)
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		formats := video.Formats.WithAudioChannels()
-		streamURL, err := client.GetStreamURL(video, &formats[0])
+		streamURL, err := ytClient.GetStreamURL(video, &formats[0])
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -70,8 +87,7 @@ Golang API for downloading YouTube videos and playlists
 			return
 		}
 
-		client := youtube.Client{}
-		playlist, err := client.GetPlaylist(playlistURL)
+		playlist, err := ytClient.GetPlaylist(playlistURL)
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -79,13 +95,13 @@ Golang API for downloading YouTube videos and playlists
 
 		var videos []map[string]string
 		for _, entry := range playlist.Videos {
-			video, err := client.VideoFromPlaylistEntry(entry)
+			video, err := ytClient.VideoFromPlaylistEntry(entry)
 			if err != nil {
 				http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			streamURL, err := client.GetStreamURL(video, &video.Formats[0])
+			streamURL, err := ytClient.GetStreamURL(video, &video.Formats[0])
 			if err != nil {
 				http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 				return
