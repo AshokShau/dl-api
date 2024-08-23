@@ -3,21 +3,19 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Abishnoi69/ytdl-api/api/config"
+	"github.com/Abishnoi69/ytdl-api/api/instagram"
 	"github.com/kkdai/youtube/v2"
 	"net/http"
 	"net/url"
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	var Socks5Proxy = os.Getenv("SOCKS5_PROXY")
 
 	ytClient := youtube.Client{}
 	var client *http.Client
-	if Socks5Proxy != "" {
-		proxyURL, _ := url.Parse(Socks5Proxy)
+	if config.Socks5Proxy != "" {
+		proxyURL, _ := url.Parse(config.Socks5Proxy)
 		client = &http.Client{Transport: &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
 		}}
@@ -38,10 +36,12 @@ Example:
 
 Made with ❤ by @Abishnoi69
 Golang API for downloading YouTube videos and playlists
+
 `
-		if Socks5Proxy == "" {
+		if config.Socks5Proxy == "" {
 			msg += "No SOCKS5 proxy configured, maybe you get rate limited by YouTube :("
 		}
+
 		_, _ = fmt.Fprint(w, msg)
 
 	case "/dl":
@@ -122,6 +122,33 @@ Golang API for downloading YouTube videos and playlists
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(videos); err != nil {
+			http.Error(w, "Error encoding JSON response: "+err.Error(), http.StatusInternalServerError)
+		}
+	case "/instagram":
+		data, caption, err := instagram.Handle(w, r)
+		if err != nil {
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response := map[string]string{
+			"ID":                       data.ID,
+			"caption":                  caption,
+			"shortCode":                data.Shortcode,
+			"dimensions":               fmt.Sprintf("%dx%d", data.Dimensions.Width, data.Dimensions.Height),
+			"is_video":                 fmt.Sprintf("%t", data.IsVideo),
+			"title":                    data.Title,
+			"video_url":                data.VideoURL,
+			"author":                   data.Owner.Username,
+			"displayURL":               data.DisplayURL,
+			"display_resources":        fmt.Sprintf("%v", data.DisplayResources),
+			"edge_media_to_caption":    fmt.Sprintf("%v", data.EdgeMediaToCaption.Edges),
+			"edge_sidecar_to_children": fmt.Sprintf("%v", data.EdgeSidecarToChildren.Edges),
+			"coauthor_producers":       fmt.Sprintf("%v", data.CoauthorProducers),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, "Error encoding JSON response: "+err.Error(), http.StatusInternalServerError)
 		}
 
