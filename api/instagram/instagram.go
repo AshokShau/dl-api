@@ -180,17 +180,34 @@ func getGQLData(postID string) InstagramData {
 	return instagramData
 }
 
-func Handle(_ http.ResponseWriter, r *http.Request) (*ShortcodeMedia, string, error) {
+func Handle(_ http.ResponseWriter, r *http.Request) (map[string]string, error) {
 	videoId := r.URL.Query().Get("id")
 	if videoId == "" {
-		return nil, "", fmt.Errorf("please provide a video/reel/photo Id\nUsage: /instagram?id=videoId")
+		return nil, fmt.Errorf("please provide a video/reel/photo Id\nUsage: /instagram?id=videoId")
 	}
 
-	instagramData := getInstagramData(videoId)
-	if instagramData == nil {
-		return nil, "", fmt.Errorf("instagram data not found for post-ID: %v", videoId)
+	data := getInstagramData(videoId)
+	if data == nil {
+		return nil, fmt.Errorf("instagram data not found for post-ID: %v", videoId)
 	}
 
-	caption := getCaption(instagramData)
-	return instagramData, caption, nil
+	caption := getCaption(data)
+
+	response := map[string]string{
+		"ID":                       data.ID,
+		"caption":                  caption,
+		"shortCode":                data.Shortcode,
+		"dimensions":               fmt.Sprintf("%dx%d", data.Dimensions.Width, data.Dimensions.Height),
+		"is_video":                 fmt.Sprintf("%t", data.IsVideo),
+		"title":                    data.Title,
+		"video_url":                data.VideoURL,
+		"author":                   data.Owner.Username,
+		"displayURL":               data.DisplayURL,
+		"display_resources":        fmt.Sprintf("%v", data.DisplayResources),
+		"edge_media_to_caption":    fmt.Sprintf("%v", data.EdgeMediaToCaption.Edges),
+		"edge_sidecar_to_children": fmt.Sprintf("%v", data.EdgeSidecarToChildren.Edges),
+		"coauthor_producers":       fmt.Sprintf("%v", data.CoauthorProducers),
+	}
+
+	return response, nil
 }

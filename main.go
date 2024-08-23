@@ -9,9 +9,8 @@ import (
 
 func main() {
 	http.HandleFunc("/", api.Handler)
-	http.HandleFunc("/dl", api.Handler)
-	http.HandleFunc("/playlist", api.Handler)
-	http.HandleFunc("/instagram", api.Handler)
+	http.HandleFunc("/yt", api.Handler)
+	http.HandleFunc("/ig", api.Handler)
 
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
