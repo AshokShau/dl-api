@@ -1,7 +1,6 @@
-package utils
+package api
 
 import (
-	"github.com/Abishnoi69/dl-api/api/config"
 	"log"
 	"strings"
 
@@ -54,7 +53,7 @@ func Request(Link string, params RequestParams) *fasthttp.Response {
 		MaxConnsPerHost: 1024,
 	}
 	if params.Proxy {
-		client.Dial = fasthttpproxy.FasthttpSocksDialer(config.Socks5Proxy)
+		client.Dial = fasthttpproxy.FasthttpSocksDialer(Socks5Proxy)
 	}
 
 	request.Header.SetMethod(params.Method)

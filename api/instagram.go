@@ -1,9 +1,8 @@
-package instagram
+package api
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Abishnoi69/dl-api/api/utils"
 	"log"
 	"net/http"
 	"regexp"
@@ -59,7 +58,7 @@ func getInstagramData(postID string) *ShortcodeMedia {
 func getEmbedData(postID string) InstagramData {
 	var instagramData InstagramData
 
-	body := utils.Request(fmt.Sprintf("https://www.instagram.com/p/%v/embed/captioned/", postID), utils.RequestParams{
+	body := Request(fmt.Sprintf("https://www.instagram.com/p/%v/embed/captioned/", postID), RequestParams{
 		Method: "GET",
 		Headers: map[string]string{
 			"accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -126,7 +125,7 @@ func getEmbedData(postID string) InstagramData {
 func getGQLData(postID string) InstagramData {
 	var instagramData InstagramData
 
-	body := utils.Request("https://www.instagram.com/api/graphql", utils.RequestParams{
+	body := Request("https://www.instagram.com/api/graphql", RequestParams{
 		Method: "POST",
 		Headers: map[string]string{
 			"User-Agent":         "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",

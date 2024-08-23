@@ -1,8 +1,7 @@
-package youtube
+package api
 
 import (
 	"fmt"
-	"github.com/Abishnoi69/dl-api/api/config"
 	"github.com/kkdai/youtube/v2"
 	"net/http"
 	"net/url"
@@ -15,8 +14,8 @@ func HandlerYouTube(_ http.ResponseWriter, r *http.Request) ([]map[string]string
 	}
 
 	ytClient := youtube.Client{}
-	if config.Socks5Proxy != "" {
-		proxyURL, _ := url.Parse(config.Socks5Proxy)
+	if Socks5Proxy != "" {
+		proxyURL, _ := url.Parse(Socks5Proxy)
 		ytClient = youtube.Client{HTTPClient: &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}}
 	}
 

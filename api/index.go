@@ -3,9 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Abishnoi69/dl-api/api/config"
-	"github.com/Abishnoi69/dl-api/api/instagram"
-	ytAPI "github.com/Abishnoi69/dl-api/api/youtube"
 	"net/http"
 )
 
@@ -16,11 +13,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		"for yt use can use video_url, video_id, playlist_url or playlist_id\n" +
 		"Instagram: /ig?url=<post_id> - get download video url from Instagram\n" +
 		"Made with ❤️ by Abishnoi69\n" +
-		"Source code: " + config.SourceCodeURL + "\n"
+		"Source code: " + SourceCodeURL + "\n"
 
 	switch r.URL.Path {
 	case "/":
-		if config.Socks5Proxy == "" {
+		if Socks5Proxy == "" {
 			infoMsg += "NOTE: No SOCKS5 proxy configured, maybe you get rate limited by YouTube :("
 		}
 
@@ -31,7 +28,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "/yt":
-		video, err := ytAPI.HandlerYouTube(w, r)
+		video, err := HandlerYouTube(w, r)
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -48,7 +45,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "/ig":
-		data, err := instagram.Handle(w, r)
+		data, err := Handle(w, r)
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return

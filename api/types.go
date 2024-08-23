@@ -1,4 +1,4 @@
-package instagram
+package api
 
 type InstagramData *struct {
 	ShortcodeMedia *ShortcodeMedia `json:"shortcode_media"`
