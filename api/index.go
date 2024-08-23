@@ -11,38 +11,25 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-
 	ytClient := youtube.Client{}
-	var client *http.Client
 	if config.Socks5Proxy != "" {
 		proxyURL, _ := url.Parse(config.Socks5Proxy)
-		client = &http.Client{Transport: &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
-		}}
-		ytClient = youtube.Client{HTTPClient: client}
+		ytClient = youtube.Client{HTTPClient: &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}}
 	}
 
 	switch r.URL.Path {
 	case "/":
-		msg := `Welcome to ytDl API
-/dl?url=<video_url> - Download a single video
-/playlist?url=<playlist_url> - Download a playlist
-			
-Example:
-/dl?url=https://www.youtube.com/watch?v=video_id
-/dl?url=video_id
-/playlist?url=https://www.youtube.com/playlist?list=playlist_id
-/playlist?url=playlist_id
-
-Made with ❤ by @Abishnoi69
-Golang API for downloading YouTube videos and playlists
-
-`
+		infoMsg := fmt.Sprintf("Welcome to ytDl API\n/dl?url=<video_url> - Download a single video\n/playlist?url=<playlist_url> - Download a playlist\nExample:\n/dl?url=https://www.youtube.com/watch?v=video_id\n/dl?url=video_id\n/playlist?url=https://www.youtube.com/playlist?list=playlist_id\n/playlist?url=playlist_id\n/instagram?id=instagram_video/reel/photo_id\nMade with ❤ by @Abishnoi69\nGolang API for downloading YouTube videos and playlists\n")
 		if config.Socks5Proxy == "" {
-			msg += "No SOCKS5 proxy configured, maybe you get rate limited by YouTube :("
+			infoMsg += "No SOCKS5 proxy configured, maybe you get rate limited by YouTube :("
 		}
 
-		_, _ = fmt.Fprint(w, msg)
+		w.Header().Set("Content-Type", "application/json")
+		_, err := fmt.Fprint(w, infoMsg)
+		if err != nil {
+			http.Error(w, "Error writing response: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 	case "/dl":
 		videoURL := r.URL.Query().Get("url")
@@ -57,8 +44,7 @@ Golang API for downloading YouTube videos and playlists
 			return
 		}
 
-		formats := video.Formats.WithAudioChannels()
-		streamURL, err := ytClient.GetStreamURL(video, &formats[0])
+		streamURL, err := ytClient.GetStreamURL(video, &video.Formats.WithAudioChannels()[0])
 		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -107,7 +93,7 @@ Golang API for downloading YouTube videos and playlists
 				return
 			}
 
-			videoInfo := map[string]string{
+			videos = append(videos, map[string]string{
 				"ID":          video.ID,
 				"author":      video.Author,
 				"duration":    video.Duration.String(),
@@ -116,14 +102,14 @@ Golang API for downloading YouTube videos and playlists
 				"stream_url":  streamURL,
 				"title":       video.Title,
 				"view_count":  fmt.Sprintf("%d", video.Views),
-			}
-			videos = append(videos, videoInfo)
+			})
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(videos); err != nil {
 			http.Error(w, "Error encoding JSON response: "+err.Error(), http.StatusInternalServerError)
 		}
+
 	case "/instagram":
 		data, caption, err := instagram.Handle(w, r)
 		if err != nil {

@@ -17,33 +17,6 @@ var (
 	htmlTagRegex   = regexp.MustCompile(`<[^>]*>`)
 )
 
-// getPostID returns the post-ID from the given URL
-func getPostID(url string) (postID string) {
-	if matches := regexp.MustCompile(`(?:reels?|p)/([A-Za-z0-9_-]+)`).FindStringSubmatch(url); len(matches) == 2 {
-		return matches[1]
-	}
-	return postID
-}
-
-func getScrapperAPIData(postID string) InstagramData {
-	var instagramData InstagramData
-
-	body := utils.Request("https://scrapper.ruizlenato.tech/instagram", utils.RequestParams{
-		Method: "GET",
-		Query: map[string]string{
-			"id": postID,
-		},
-	}).Body()
-
-	err := json.Unmarshal(body, &instagramData)
-	if err != nil {
-		log.Print("Instagram: Error unmarshalling ScrapperAPI-Data: ", err)
-		return nil
-	}
-
-	return instagramData
-}
-
 func getCaption(instagramData *ShortcodeMedia) string {
 	if len(instagramData.EdgeMediaToCaption.Edges) > 0 {
 		var sb strings.Builder
@@ -78,9 +51,7 @@ func getCaption(instagramData *ShortcodeMedia) string {
 func getInstagramData(postID string) *ShortcodeMedia {
 	if data := getEmbedData(postID); data != nil && data.ShortcodeMedia != nil {
 		return data.ShortcodeMedia
-	} else if data := getScrapperAPIData(postID); data != nil && data.ShortcodeMedia != nil {
-		return data.ShortcodeMedia
-	} else if data := getGQLData(postID); data != nil && data.Data.XDTShortcodeMedia != nil {
+	} else if data = getGQLData(postID); data != nil && data.Data.XDTShortcodeMedia != nil {
 		return data.Data.XDTShortcodeMedia
 	}
 
@@ -218,13 +189,11 @@ func getGQLData(postID string) InstagramData {
 
 // Handle returns the Instagram data and caption for the given post-ID
 func Handle(_ http.ResponseWriter, r *http.Request) (*ShortcodeMedia, string, error) {
-	videoURl := r.URL.Query().Get("url")
-	if videoURl == "" {
-		return nil, "", fmt.Errorf("please provide a video URL")
+	videoId := r.URL.Query().Get("id")
+	if videoId == "" {
+		return nil, "", fmt.Errorf("please provide a video/reel/photo Id\nUsage: /instagram?id=videoId")
 	}
 
-	//videoId := getPostID(videoURl)
-	videoId := videoURl
 	instagramData := getInstagramData(videoId)
 	if instagramData == nil {
 		return nil, "", fmt.Errorf("instagram data not found for post-ID: %v", videoId)
