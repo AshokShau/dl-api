@@ -3,7 +3,7 @@ package instagram
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Abishnoi69/ytdl-api/api/utils"
+	"github.com/Abishnoi69/dl-api/api/utils"
 	"log"
 	"net/http"
 	"regexp"

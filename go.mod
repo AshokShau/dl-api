@@ -1,4 +1,4 @@
-module github.com/Abishnoi69/ytdl-api
+module github.com/Abishnoi69/dl-api
 
 go 1.22.6
 

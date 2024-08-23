@@ -3,9 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Abishnoi69/ytdl-api/api/config"
-	"github.com/Abishnoi69/ytdl-api/api/instagram"
-	ytAPI "github.com/Abishnoi69/ytdl-api/api/youtube"
+	"github.com/Abishnoi69/dl-api/api/config"
+	"github.com/Abishnoi69/dl-api/api/instagram"
+	ytAPI "github.com/Abishnoi69/dl-api/api/youtube"
 	"net/http"
 )
 

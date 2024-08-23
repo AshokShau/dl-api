@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/Abishnoi69/ytdl-api/api/config"
+	"github.com/Abishnoi69/dl-api/api/config"
 	"log"
 	"strings"
 

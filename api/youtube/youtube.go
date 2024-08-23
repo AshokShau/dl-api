@@ -2,7 +2,7 @@ package youtube
 
 import (
 	"fmt"
-	"github.com/Abishnoi69/ytdl-api/api/config"
+	"github.com/Abishnoi69/dl-api/api/config"
 	"github.com/kkdai/youtube/v2"
 	"net/http"
 	"net/url"
